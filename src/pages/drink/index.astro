@@ -1,6 +1,6 @@
 ---
+import { url } from "../../lib/url";
 import Base from "../../layouts/Base.astro";
-import CatHeader from "../../components/CatHeader.astro";
 import CategoryPage from "../../components/CategoryPage.astro";
 import { shopsIn } from "../../data/shops";
 
@@ -25,7 +25,6 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
   description="枕崎市の居酒屋・バー・スナック・カラオケ。料金がわかる夜の店の一覧。"
   category="drink"
 >
-  <!-- ★このカテゴリ固有の仕掛け（思想7）。他のページと同じ顔にしない -->
   <section class="night">
     <div class="wrap">
       <p class="night-eyebrow">枕崎の夜</p>
@@ -41,7 +40,7 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
         <ul class="price">
           {priced.map((s) => (
             <li class="price-row">
-              <a class="price-name" href={`/shop/${s.slug}/`}>{s.name}</a>
+              <a class="price-name" href={url(`/shop/${s.slug}/`)}>{s.name}</a>
               <span class="price-val">{s.charge}</span>
               <span class="price-where">{s.address}</span>
             </li>
@@ -67,7 +66,7 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
               <ul class="bld-list">
                 {list.map((s) => (
                   <li>
-                    <a href={`/shop/${s.slug}/`}>
+                    <a href={url(`/shop/${s.slug}/`)}>
                       <span class="bld-shop">{s.name}</span>
                       <span class="bld-sub">{s.subLabel}</span>
                     </a>
@@ -88,7 +87,6 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
 </Base>
 
 <style>
-  /* 夜のカテゴリだけの導入部。ここで世界観を切り替える */
   .night {
     background:
       radial-gradient(90% 60% at 20% 0%, rgba(196, 42, 110, 0.28) 0%, transparent 60%),
@@ -98,6 +96,7 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
   }
   .night-eyebrow {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-xs);
     letter-spacing: 0.3em;
     color: var(--accent);
@@ -135,6 +134,7 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
   .price-name:hover { color: var(--accent); }
   .price-val {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-sm);
     color: var(--accent);
   }
@@ -149,16 +149,12 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
     opacity: 0.45;
   }
 
-  /* --- はしご酒 --------------------------------------------------------- */
   .hashigo {
     background: var(--sea-mid);
     color: var(--foam);
     padding: var(--s-12) 0;
   }
-  .hashigo-h {
-    margin-top: var(--s-3);
-    font-size: var(--t-lg);
-  }
+  .hashigo-h { margin-top: var(--s-3); font-size: var(--t-lg); }
   .hashigo-grid {
     margin-top: var(--s-6);
     display: grid;
@@ -173,6 +169,7 @@ const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
   }
   .bld-name {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-xs);
     letter-spacing: 0.1em;
     color: var(--accent);

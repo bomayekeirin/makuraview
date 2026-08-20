@@ -1,12 +1,11 @@
 ---
+import { url } from "../lib/url";
 import CatHeader from "./CatHeader.astro";
 import { CATEGORIES, byId, type CategoryId } from "../data/categories";
 
 interface Props {
   category: CategoryId;
-  /** 集めてある件数（網羅データより） */
   collected: number;
-  /** 何が載る予定か。空ページに「何が来るか」を書く */
   plans: string[];
 }
 const { category, collected, plans } = Astro.props;
@@ -30,7 +29,7 @@ const ready = CATEGORIES.filter((c) => c.ready);
     </ul>
 
     <div class="soon-cta">
-      <a class="btn-main" href="/entry/">お店を教える</a>
+      <a class="btn-main" href={url("/entry/")}>お店を教える</a>
       <p class="soon-note">
         載せてほしいお店、載ってほしくないお店、どちらも教えてください。
       </p>
@@ -41,7 +40,7 @@ const ready = CATEGORIES.filter((c) => c.ready);
     <p class="alt-label">先に見られるのはこちら</p>
     <div class="alt-grid">
       {ready.map((c) => (
-        <a class="alt-card" href={`/${c.id}/`} style={`--c:${c.color}`}>
+        <a class="alt-card" href={url(`/${c.id}/`)} style={`--c:${c.color}`}>
           <span class="alt-name">{c.label}</span>
           <span class="alt-note">{c.note}</span>
           <span class="alt-arrow" aria-hidden="true">→</span>
@@ -54,7 +53,7 @@ const ready = CATEGORIES.filter((c) => c.ready);
 <footer class="foot">
   <div class="wrap">
     <p class="foot-logo">まくらびゅ</p>
-    <a class="foot-home" href="/">ほかのカテゴリを見る</a>
+    <a class="foot-home" href={url("/")}>ほかのカテゴリを見る</a>
   </div>
 </footer>
 
@@ -73,6 +72,7 @@ const ready = CATEGORIES.filter((c) => c.ready);
   }
   .soon-eyebrow {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-xs);
     letter-spacing: 0.3em;
     color: var(--accent);
@@ -89,6 +89,7 @@ const ready = CATEGORIES.filter((c) => c.ready);
   }
   .soon-num {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-lg);
     color: var(--accent);
   }
@@ -132,10 +133,10 @@ const ready = CATEGORIES.filter((c) => c.ready);
     color: var(--ink-mid);
   }
 
-  /* --- 行き止まりにしない ---------------------------------------------- */
   .alt { margin-top: var(--s-16); }
   .alt-label {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-xs);
     letter-spacing: 0.2em;
     color: var(--ink-faint);

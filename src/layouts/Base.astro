@@ -1,0 +1,84 @@
+---
+import "../styles/tokens.css";
+import { byId, type CategoryId } from "../data/categories";
+
+interface Props {
+  title: string;
+  description?: string;
+  category?: CategoryId;
+  dark?: boolean;
+}
+
+const {
+  title,
+  description = "枕崎市の店・行政・求人をまとめて探せるポータルサイト。",
+  category,
+  dark = false,
+} = Astro.props;
+
+const cat = category ? byId(category) : undefined;
+
+// 開発中はインデックスさせない。Phase 4（独自ドメイン移行）でここを true にする。
+// ★解除を忘れると永久に検索に出ない。リリース手順の最上段に置くこと。
+const ALLOW_INDEX = import.meta.env.PUBLIC_ALLOW_INDEX === "true";
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {!ALLOW_INDEX && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content={dark ? "#071E2B" : (cat?.color ?? "#0E3346")} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700&family=Roboto+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    {cat && <style set:html={`:root{--accent:${cat.color};}`} />}
+  </head>
+
+  <body class={dark ? "is-dark" : ""} data-category={category ?? ""}>
+    <slot />
+
+    <style is:global>
+      body.is-dark {
+        background: var(--sea-deep);
+        color: var(--foam);
+      }
+
+      /* --- ページ遷移 ----------------------------------------------------
+         白飛びさせない。ホームだけ凝っていて中が素っ気ない、を避ける。
+         ------------------------------------------------------------------ */
+      body {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.36s var(--ease), transform 0.36s var(--ease);
+      }
+      html.is-entering body {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      html.is-leaving body {
+        opacity: 0;
+        transform: translateY(-6px);
+        transition-duration: 0.22s;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        body { transition: none; }
+        html.is-entering body,
+        html.is-leaving body { opacity: 1; transform: none; }
+      }
+    </style>
+
+    <script>
+      import "../scripts/base.ts";
+    </script>
+  </body>
+</html>

@@ -1,0 +1,188 @@
+---
+import CatHeader from "./CatHeader.astro";
+import { CATEGORIES, byId, type CategoryId } from "../data/categories";
+
+interface Props {
+  category: CategoryId;
+  /** 集めてある件数（網羅データより） */
+  collected: number;
+  /** 何が載る予定か。空ページに「何が来るか」を書く */
+  plans: string[];
+}
+const { category, collected, plans } = Astro.props;
+const cat = byId(category)!;
+const ready = CATEGORIES.filter((c) => c.ready);
+---
+
+<CatHeader current={category} />
+
+<main class="wrap">
+  <section class="soon">
+    <p class="soon-eyebrow">準備中</p>
+    <h2 class="soon-h">{cat.label}は、いま作っています</h2>
+    <p class="soon-lead">
+      調べたお店は <strong class="soon-num">{collected}</strong> 軒。<br />
+      ひとつずつ確認をとってから載せるので、もう少しかかります。
+    </p>
+
+    <ul class="plans">
+      {plans.map((p) => <li>{p}</li>)}
+    </ul>
+
+    <div class="soon-cta">
+      <a class="btn-main" href="/entry/">お店を教える</a>
+      <p class="soon-note">
+        載せてほしいお店、載ってほしくないお店、どちらも教えてください。
+      </p>
+    </div>
+  </section>
+
+  <section class="alt">
+    <p class="alt-label">先に見られるのはこちら</p>
+    <div class="alt-grid">
+      {ready.map((c) => (
+        <a class="alt-card" href={`/${c.id}/`} style={`--c:${c.color}`}>
+          <span class="alt-name">{c.label}</span>
+          <span class="alt-note">{c.note}</span>
+          <span class="alt-arrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="foot-logo">まくらびゅ</p>
+    <a class="foot-home" href="/">ほかのカテゴリを見る</a>
+  </div>
+</footer>
+
+<style>
+  main { padding: var(--s-12) 0 var(--s-16); }
+
+  .soon {
+    padding: var(--s-8);
+    border-radius: var(--r-md);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 10%, #fff) 0%,
+      var(--paper-warm) 100%
+    );
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .soon-eyebrow {
+    font-family: var(--font-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .soon-h {
+    margin-top: var(--s-3);
+    font-size: clamp(1.6rem, 6vw, var(--t-lg));
+  }
+  .soon-lead {
+    margin-top: var(--s-4);
+    font-size: var(--t-sm);
+    line-height: 2;
+    color: var(--ink-mid);
+  }
+  .soon-num {
+    font-family: var(--font-data);
+    font-size: var(--t-lg);
+    color: var(--accent);
+  }
+
+  .plans {
+    margin-top: var(--s-6);
+    display: grid;
+    gap: var(--s-2);
+  }
+  .plans li {
+    position: relative;
+    padding-left: 1.4em;
+    font-size: var(--t-sm);
+    color: var(--ink);
+    line-height: 1.9;
+  }
+  .plans li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.72em;
+    width: 8px; height: 8px;
+    border-radius: var(--r-full);
+    background: var(--accent);
+  }
+
+  .soon-cta { margin-top: var(--s-8); }
+  .btn-main {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding: 0 var(--s-8);
+    border-radius: var(--r-full);
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+  .btn-main:hover { filter: brightness(1.1); }
+  .soon-note {
+    margin-top: var(--s-3);
+    font-size: var(--t-xs);
+    color: var(--ink-mid);
+  }
+
+  /* --- 行き止まりにしない ---------------------------------------------- */
+  .alt { margin-top: var(--s-16); }
+  .alt-label {
+    font-family: var(--font-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+  .alt-grid {
+    margin-top: var(--s-4);
+    display: grid;
+    gap: var(--s-3);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .alt-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: var(--s-5, 1.25rem);
+    border-radius: var(--r-md);
+    border: 1.5px solid var(--c);
+    background: #fff;
+    transition: background 0.24s var(--ease), transform 0.24s var(--ease);
+  }
+  .alt-card:hover {
+    background: color-mix(in srgb, var(--c) 8%, #fff);
+    transform: translateY(-2px);
+  }
+  .alt-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--t-md);
+    color: var(--c);
+  }
+  .alt-note { font-size: var(--t-xs); color: var(--ink-mid); }
+  .alt-arrow { margin-left: auto; color: var(--c); font-size: 1.1rem; }
+
+  .foot {
+    background: var(--sea-deep);
+    color: var(--foam);
+    padding: var(--s-12) 0;
+    text-align: center;
+  }
+  .foot-logo { font-family: var(--font-display); font-weight: 900; font-size: var(--t-md); }
+  .foot-home {
+    display: inline-block;
+    margin-top: var(--s-4);
+    padding: var(--s-3) var(--s-6);
+    border: 1px solid rgba(237, 243, 241, 0.3);
+    border-radius: var(--r-full);
+    font-size: var(--t-sm);
+  }
+  .foot-home:hover { background: rgba(237, 243, 241, 0.1); }
+</style>

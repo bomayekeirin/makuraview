@@ -1,0 +1,49 @@
+---
+import Base from "../layouts/Base.astro";
+import { CATEGORIES } from "../data/categories";
+---
+<Base title="ページが見つかりません ─ まくらびゅ" dark>
+  <main class="wrap nf">
+    <p class="num">404</p>
+    <h1>そのページは、ありませんでした</h1>
+    <p class="lead">消えたか、まだ作っていないかのどちらかです。</p>
+    <div class="grid">
+      {CATEGORIES.map((c) => (
+        <a class="card" href={`/${c.id}/`} style={`--c:${c.color}`}>
+          <span class="name">{c.label}</span>
+          <span class="note">{c.note}</span>
+        </a>
+      ))}
+    </div>
+    <a class="home" href="/">はじめから見る</a>
+  </main>
+</Base>
+<style>
+  .nf { padding: var(--s-16) 0; text-align: center; }
+  .num {
+    font-family: var(--font-data); font-size: var(--t-3xl);
+    color: var(--sea-shallow); line-height: 1;
+  }
+  h1 { margin-top: var(--s-4); font-size: var(--t-lg); }
+  .lead { margin-top: var(--s-3); opacity: 0.7; font-size: var(--t-sm); }
+  .grid {
+    margin-top: var(--s-8); display: grid; gap: var(--s-3);
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    text-align: left;
+  }
+  .card {
+    padding: var(--s-4); border-radius: var(--r-md);
+    border: 1.5px solid var(--c);
+    display: flex; flex-direction: column; gap: 2px;
+    transition: background 0.2s var(--ease);
+  }
+  .card:hover { background: color-mix(in srgb, var(--c) 18%, transparent); }
+  .name { font-family: var(--font-display); font-weight: 700; color: var(--c); }
+  .note { font-size: var(--t-xs); opacity: 0.6; }
+  .home {
+    display: inline-block; margin-top: var(--s-8);
+    padding: var(--s-3) var(--s-6);
+    border: 1px solid rgba(237,243,241,0.3); border-radius: var(--r-full);
+    font-size: var(--t-sm);
+  }
+</style>

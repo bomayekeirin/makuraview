@@ -1,0 +1,153 @@
+---
+import { WEEKDAY_JA, isOpenToday, type Shop } from "../data/shops";
+
+interface Props { shop: Shop }
+const { shop } = Astro.props;
+const open = isOpenToday(shop);
+const closedText = shop.closed.length
+  ? shop.closed.map((d) => WEEKDAY_JA[d]).join("・") + "休"
+  : "無休";
+---
+
+<article class="card">
+  <a class="hit" href={`/shop/${shop.slug}/`} data-track="page_view" data-shop={shop.slug}>
+    <div class="head">
+      <span class="tag">{shop.subLabel}</span>
+      <span class:list={["state", open ? "is-open" : "is-closed"]}>
+        {open ? "今日は営業日" : "今日は定休日"}
+      </span>
+    </div>
+
+    <h3 class="name">{shop.name}</h3>
+    {shop.lead && <p class="lead">{shop.lead}</p>}
+
+    {shop.signature && (
+      <p class="sig">
+        <span class="sig-item">{shop.signature.item}</span>
+        {shop.signature.price && <span class="sig-price">{shop.signature.price}</span>}
+      </p>
+    )}
+
+    <dl class="meta">
+      <div><dt>場所</dt><dd>{shop.address}</dd></div>
+      {shop.hours && <div><dt>時間</dt><dd class="num">{shop.hours}</dd></div>}
+      <div><dt>休み</dt><dd>{closedText}</dd></div>
+    </dl>
+  </a>
+
+  <!-- 計測用。data属性で宣言的に持たせ、拾うのは1箇所（D-15） -->
+  {shop.tel && (
+    <a class="tel" href={`tel:${shop.tel.replace(/-/g, "")}`}
+       data-track="tap_tel" data-shop={shop.slug}>
+      <span aria-hidden="true">☎</span>
+      <span class="num">{shop.tel}</span>
+    </a>
+  )}
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid rgba(20, 35, 43, 0.09);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .hit {
+    flex: 1;
+    display: block;
+    padding: var(--s-5, 1.25rem) var(--s-5, 1.25rem) var(--s-4);
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: var(--t-xs);
+    padding: 3px 10px;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: color-mix(in srgb, var(--accent) 78%, #000);
+    font-weight: 700;
+  }
+  .state {
+    font-family: var(--font-data);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+  .is-open { color: #1F7A4D; }
+  .is-closed { color: var(--ink-faint); }
+
+  .name {
+    margin-top: var(--s-3);
+    font-size: var(--t-md);
+    letter-spacing: 0.01em;
+  }
+  .lead {
+    margin-top: var(--s-2);
+    font-size: var(--t-sm);
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  /* 名物と価格。数字が入ると急に「使えるサイト」になる */
+  .sig {
+    margin-top: var(--s-3);
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm);
+    background: var(--paper-warm);
+    border-left: 3px solid var(--accent);
+  }
+  .sig-item { font-weight: 700; font-size: var(--t-sm); }
+  .sig-price {
+    font-family: var(--font-data);
+    font-size: var(--t-sm);
+    color: var(--accent);
+    font-weight: var(--w-body);
+  }
+
+  .meta {
+    margin: var(--s-4) 0 0;
+    display: grid;
+    gap: 3px;
+    font-size: var(--t-xs);
+    color: var(--ink-mid);
+  }
+  .meta > div { display: flex; gap: var(--s-3); }
+  .meta dt {
+    flex: 0 0 2.4em;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+  .meta dd { margin: 0; }
+  .num { font-family: var(--font-data); font-weight: 500; font-size: 0.92em; }
+
+  .tel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    min-height: var(--tap-min);
+    padding: var(--s-3);
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: var(--t-sm);
+    transition: filter 0.2s var(--ease);
+  }
+  .tel:hover { filter: brightness(1.1); }
+</style>

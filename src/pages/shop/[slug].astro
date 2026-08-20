@@ -1,0 +1,396 @@
+---
+import Base from "../../layouts/Base.astro";
+import CatHeader from "../../components/CatHeader.astro";
+import { SHOPS, WEEKDAY_JA, isOpenToday, neighborsOf } from "../../data/shops";
+import { byId } from "../../data/categories";
+
+export function getStaticPaths() {
+  return SHOPS.map((shop) => ({ params: { slug: shop.slug }, props: { shop } }));
+}
+
+const { shop } = Astro.props;
+const cat = byId(shop.primary)!;
+const open = isOpenToday(shop);
+const closedText = shop.closed.length
+  ? shop.closed.map((d) => WEEKDAY_JA[d]).join("・")
+  : "なし";
+const mapQuery = encodeURIComponent(`枕崎市${shop.address} ${shop.name}`);
+const neighbors = neighborsOf(shop);
+---
+
+<Base
+  title={`${shop.name} ─ まくらびゅ｜枕崎市網羅型ポータルサイト`}
+  description={shop.lead ?? `枕崎市${shop.address}の${shop.subLabel}。`}
+  category={shop.primary}
+>
+  <CatHeader current={shop.primary} />
+
+  <main class="wrap">
+    <nav class="crumb" aria-label="現在地">
+      <a href={`/${shop.primary}/`}>{cat.label}</a>
+      <span aria-hidden="true">›</span>
+      <span>{shop.subLabel}</span>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">{shop.subLabel}</p>
+      <h1>{shop.name}</h1>
+      <p class="kana">{shop.kana}</p>
+      {shop.lead && <p class="lead">{shop.lead}</p>}
+
+      {shop.categories.length > 1 && (
+        <p class="also">
+          このお店は
+          {shop.categories.map((c) => {
+            const x = byId(c)!;
+            return <a class="also-link" href={`/${c}/`} style={`--c:${x.color}`}>{x.label}</a>;
+          })}
+          に載っています
+        </p>
+      )}
+    </header>
+
+    {/* ★夜の店で最も知りたい情報。ここを最上部に置く */}
+    {shop.charge && (
+      <section class="charge">
+        <p class="charge-label">料金</p>
+        <p class="charge-val">{shop.charge}</p>
+        <p class="charge-note">掲載時点の情報です。お店で確認してください。</p>
+      </section>
+    )}
+
+    {shop.signature && (
+      <section class="sig">
+        <p class="sig-label">名物</p>
+        <p class="sig-item">{shop.signature.item}</p>
+        {shop.signature.price && <p class="sig-price">{shop.signature.price}</p>}
+      </section>
+    )}
+
+    {/* ★定休日データだけでは足りない店がある */}
+    {shop.irregular && (
+      <p class="warn">
+        <span class="warn-mark" aria-hidden="true">!</span>
+        この店は定休日以外にも休むことがあります。行く前に確認してください。
+      </p>
+    )}
+
+    <section class="facts">
+      <div class="fact">
+        <p class="fact-key">きょう</p>
+        <p class:list={["fact-val", open ? "ok" : "ng"]}>
+          {open ? "営業日です" : "定休日です"}
+        </p>
+      </div>
+      <div class="fact">
+        <p class="fact-key">営業時間</p>
+        <p class="fact-val num">{shop.hours ?? "確認中"}</p>
+      </div>
+      <div class="fact">
+        <p class="fact-key">定休日</p>
+        <p class="fact-val">{closedText}</p>
+      </div>
+      <div class="fact">
+        <p class="fact-key">住所</p>
+        <p class="fact-val">枕崎市{shop.address}</p>
+      </div>
+    </section>
+
+    {/* 予約手段・決済・配達・食事制限。載せ方を間違えると店に迷惑がかかる情報 */}
+    {(shop.reservation || shop.payment || shop.delivery || shop.dietary) && (
+      <section class="notes">
+        {shop.reservation && (
+          <div class="note">
+            <p class="note-key">予約</p>
+            <p class="note-val">{shop.reservation}</p>
+          </div>
+        )}
+        {shop.payment && (
+          <div class="note">
+            <p class="note-key">支払い</p>
+            <p class="note-val">{shop.payment}</p>
+          </div>
+        )}
+        {shop.delivery && (
+          <div class="note">
+            <p class="note-key">配達</p>
+            <p class="note-val">{shop.delivery}</p>
+          </div>
+        )}
+        {shop.dietary && (
+          <div class="note">
+            <p class="note-key">食事制限</p>
+            <p class="note-val">{shop.dietary}</p>
+          </div>
+        )}
+      </section>
+    )}
+
+    {/* 計測の中心。tap_tel が営業の最強材料になる */}
+    <section class="acts">
+      {shop.tel && (
+        <a class="act act-primary" href={`tel:${shop.tel.replace(/-/g, "")}`}
+           data-track="tap_tel" data-shop={shop.slug}>
+          <span class="act-ico" aria-hidden="true">☎</span>
+          <span class="act-txt">電話する<span class="act-sub num">{shop.tel}</span></span>
+        </a>
+      )}
+      <a class="act" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
+         target="_blank" rel="noopener"
+         data-track="tap_map" data-shop={shop.slug}>
+        <span class="act-ico" aria-hidden="true">◎</span>
+        <span class="act-txt">地図で見る<span class="act-sub">ルート案内</span></span>
+      </a>
+      {shop.instagram && (
+        <a class="act" href={`https://instagram.com/${shop.instagram}`}
+           target="_blank" rel="noopener"
+           data-track="tap_instagram" data-shop={shop.slug}>
+          <span class="act-ico" aria-hidden="true">◍</span>
+          <span class="act-txt">Instagram<span class="act-sub">@{shop.instagram}</span></span>
+        </a>
+      )}
+      {shop.x && (
+        <a class="act" href={`https://x.com/${shop.x}`}
+           target="_blank" rel="noopener"
+           data-track="tap_x" data-shop={shop.slug}>
+          <span class="act-ico" aria-hidden="true">✕</span>
+          <span class="act-txt">X（旧Twitter）<span class="act-sub">@{shop.x}</span></span>
+        </a>
+      )}
+    </section>
+
+    {/* ★同じ建物に入っている店。枕崎はテナントビルが多い */}
+    {neighbors.length > 0 && (
+      <section class="nb">
+        <p class="nb-label">同じ建物に、あと{neighbors.length}軒</p>
+        <p class="nb-bld">{shop.building}</p>
+        <div class="nb-grid">
+          {neighbors.map((n) => (
+            <a class="nb-card" href={`/shop/${n.slug}/`}>
+              <span class="nb-name">{n.name}</span>
+              <span class="nb-sub">{n.subLabel}</span>
+              {n.charge && <span class="nb-charge">{n.charge}</span>}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {shop.operator && (
+      <p class="op">同じ方が「{shop.operator}」を営んでいます。</p>
+    )}
+
+    <section class="fix">
+      <p>
+        情報が違っていたら教えてください。すぐ直します。
+        <a href="/contact/">まちがいを教える</a>
+      </p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <a class="back" href={`/${shop.primary}/`}>← {cat.label}の一覧へ</a>
+      <a class="back" href="/">ほかのカテゴリを見る</a>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  main { padding: var(--s-6) 0 var(--s-16); }
+
+  .crumb {
+    display: flex; align-items: center; gap: var(--s-2);
+    font-size: var(--t-xs); color: var(--ink-faint);
+  }
+  .crumb a { color: var(--accent); }
+
+  .hero { margin-top: var(--s-6); }
+  .hero h1 { margin-top: var(--s-2); font-size: clamp(1.9rem, 7vw, var(--t-xl)); }
+  .kana {
+    margin-top: var(--s-1);
+    font-size: var(--t-xs); color: var(--ink-faint); letter-spacing: 0.1em;
+  }
+  .lead {
+    margin-top: var(--s-4);
+    font-size: var(--t-md); line-height: 1.95;
+    font-weight: var(--w-body);
+    color: var(--ink-mid); max-width: 40em;
+  }
+
+  .also {
+    margin-top: var(--s-4);
+    font-size: var(--t-xs); color: var(--ink-faint);
+    display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap;
+  }
+  .also-link {
+    padding: 3px 11px; border-radius: var(--r-full);
+    border: 1.5px solid var(--c); color: var(--c); font-weight: 700;
+  }
+
+  /* --- 料金（夜の店の主役） --------------------------------------------- */
+  .charge {
+    margin-top: var(--s-8);
+    padding: var(--s-6);
+    border-radius: var(--r-md);
+    background: var(--sea-deep);
+    color: var(--foam);
+  }
+  .charge-label {
+    font-family: var(--font-data);
+    font-size: var(--t-xs); letter-spacing: 0.3em; color: var(--accent);
+  }
+  .charge-val {
+    margin-top: var(--s-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.15rem, 4.4vw, var(--t-md));
+    line-height: 1.6;
+  }
+  .charge-note { margin-top: var(--s-3); font-size: var(--t-xs); opacity: 0.45; }
+
+  .sig {
+    margin-top: var(--s-6);
+    padding: var(--s-6);
+    border-radius: var(--r-md);
+    background: var(--paper-warm);
+    border-left: 4px solid var(--accent);
+    display: flex; align-items: baseline; gap: var(--s-4); flex-wrap: wrap;
+  }
+  .sig-label {
+    font-family: var(--font-data);
+    font-size: var(--t-xs); letter-spacing: 0.28em; color: var(--accent);
+  }
+  .sig-item { font-family: var(--font-display); font-weight: 700; font-size: var(--t-md); }
+  .sig-price {
+    font-family: var(--font-data); font-size: var(--t-md);
+    color: var(--accent); margin-left: auto;
+  }
+
+  /* --- 注意 -------------------------------------------------------------- */
+  .warn {
+    margin-top: var(--s-6);
+    display: flex; align-items: flex-start; gap: var(--s-3);
+    padding: var(--s-4);
+    border-radius: var(--r-sm);
+    background: #FFF7E8;
+    border: 1px solid #E9C97A;
+    font-size: var(--t-sm);
+    line-height: 1.8;
+  }
+  .warn-mark {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: var(--r-full);
+    background: #C98A16; color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--font-data); font-weight: 700; font-size: 0.8rem;
+  }
+
+  .facts {
+    margin-top: var(--s-6);
+    display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: rgba(20, 35, 43, 0.1);
+    border: 1px solid rgba(20, 35, 43, 0.1);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .fact { background: #fff; padding: var(--s-4); }
+  .fact-key { font-size: var(--t-xs); color: var(--ink-faint); letter-spacing: 0.1em; }
+  .fact-val { margin-top: var(--s-1); font-weight: 700; font-size: var(--t-sm); line-height: 1.6; }
+  .fact-val.ok { color: #1F7A4D; }
+  .fact-val.ng { color: var(--ink-faint); }
+  .num { font-family: var(--font-data); font-weight: 500; }
+
+  .notes {
+    margin-top: var(--s-4);
+    display: grid; gap: var(--s-3);
+  }
+  .note {
+    display: flex; gap: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border-radius: var(--r-sm);
+    background: var(--paper-warm);
+    font-size: var(--t-sm);
+  }
+  .note-key {
+    flex: 0 0 4.5em;
+    color: var(--ink-faint);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .note-val { line-height: 1.8; }
+
+  .acts {
+    margin-top: var(--s-6);
+    display: grid; gap: var(--s-3);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .act {
+    display: flex; align-items: center; gap: var(--s-3);
+    min-height: 68px;
+    padding: var(--s-3) var(--s-5, 1.25rem);
+    border-radius: var(--r-md);
+    border: 1.5px solid rgba(20, 35, 43, 0.14);
+    background: #fff; font-weight: 700;
+    transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+  .act:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .act-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .act-primary:hover { filter: brightness(1.1); }
+  .act-ico { font-size: 1.3rem; opacity: 0.85; }
+  .act-txt { display: flex; flex-direction: column; line-height: 1.4; }
+  .act-sub { font-weight: var(--w-faint); font-size: var(--t-xs); opacity: 0.72; }
+
+  /* --- 同じ建物 ---------------------------------------------------------- */
+  .nb { margin-top: var(--s-12); }
+  .nb-label {
+    font-family: var(--font-data);
+    font-size: var(--t-xs); letter-spacing: 0.2em; color: var(--accent);
+  }
+  .nb-bld { margin-top: var(--s-1); font-family: var(--font-display); font-weight: 700; }
+  .nb-grid {
+    margin-top: var(--s-4);
+    display: grid; gap: var(--s-3);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .nb-card {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: var(--s-4);
+    border-radius: var(--r-md);
+    border: 1px solid rgba(20, 35, 43, 0.12);
+    background: #fff;
+    transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+  .nb-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .nb-name { font-family: var(--font-display); font-weight: 700; }
+  .nb-sub { font-size: var(--t-xs); color: var(--ink-faint); }
+  .nb-charge {
+    margin-top: var(--s-2);
+    font-family: var(--font-data); font-size: var(--t-xs); color: var(--accent);
+  }
+
+  .op {
+    margin-top: var(--s-6);
+    font-size: var(--t-xs);
+    color: var(--ink-mid);
+  }
+
+  .fix {
+    margin-top: var(--s-12);
+    padding: var(--s-4);
+    border-radius: var(--r-sm);
+    background: var(--paper-warm);
+    font-size: var(--t-xs); color: var(--ink-mid); text-align: center;
+  }
+  .fix a { color: var(--accent); font-weight: 700; text-decoration: underline; }
+
+  .foot { background: var(--sea-deep); padding: var(--s-8) 0; }
+  .foot-in {
+    display: flex; gap: var(--s-6); flex-wrap: wrap; justify-content: center;
+  }
+  .back { color: var(--foam); font-size: var(--t-sm); opacity: 0.85; }
+  .back:hover { opacity: 1; }
+</style>

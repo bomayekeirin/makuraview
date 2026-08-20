@@ -1,0 +1,29 @@
+---
+import Base from "../../layouts/Base.astro";
+---
+<Base title="まちがいを教える ─ まくらびゅ">
+  <main class="wrap">
+    <a class="home" href="/">← まくらびゅ</a>
+    <h1>まちがいを教えてください</h1>
+    <p class="lead">
+      営業時間が変わった、もう閉まっている、名前が違う。<br />
+      教えていただければ、すぐ直します。
+    </p>
+    <div class="cta">
+      <p class="soon">フォームは準備中です</p>
+      <p class="sm">Instagram <strong>@makuraview</strong> のDMへお願いします。</p>
+    </div>
+  </main>
+</Base>
+<style>
+  main { padding: var(--s-8) 0 var(--s-16); max-width: 44rem; }
+  .home { font-size: var(--t-sm); color: var(--ink-mid); }
+  h1 { margin-top: var(--s-6); font-size: clamp(1.8rem, 7vw, var(--t-xl)); }
+  .lead { margin-top: var(--s-4); line-height: 2; color: var(--ink-mid); }
+  .cta {
+    margin-top: var(--s-8); padding: var(--s-6);
+    border: 2px dashed rgba(20,35,43,0.2); border-radius: var(--r-md); text-align: center;
+  }
+  .soon { font-family: var(--font-display); font-weight: 700; }
+  .sm { margin-top: var(--s-3); font-size: var(--t-xs); color: var(--ink-mid); }
+</style>

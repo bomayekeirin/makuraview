@@ -1,0 +1,431 @@
+---
+import Base from "../layouts/Base.astro";
+import { CATEGORIES } from "../data/categories";
+---
+
+<Base title="まくらびゅ ─ 枕崎市網羅型ポータルサイト" dark>
+  <main class="sea">
+    <!-- 波。CSSだけで動かす。物理演算が落ちても海は残る -->
+    <div class="waves" aria-hidden="true">
+      <span class="wave wave-1"></span>
+      <span class="wave wave-2"></span>
+      <span class="wave wave-3"></span>
+    </div>
+
+    <header class="masthead">
+      <h1 class="logo">
+        <span class="logo-ja">まくらびゅ</span>
+        <span class="logo-en">makuraview</span>
+      </h1>
+      <p class="tagline">枕崎市網羅型ポータルサイト</p>
+    </header>
+
+    <!--
+      浮きの実体は DOM のリンク。
+      こうしておけば、JSが落ちてもキーボードでも辿れる。
+    -->
+    <nav class="buoys" id="buoys" aria-label="カテゴリを選ぶ">
+      {CATEGORIES.map((c) => (
+        <a
+          class:list={["buoy", { "is-soon": !c.ready }]}
+          href={`/${c.id}/`}
+          data-cat={c.id}
+          style={`--c:${c.color}`}
+        >
+          <span class="buoy-body">
+            <span class="buoy-label">{c.label}</span>
+            <span class="buoy-note">{c.note}</span>
+            {!c.ready && <span class="buoy-soon">準備中</span>}
+          </span>
+        </a>
+      ))}
+    </nav>
+
+    <footer class="seabed">
+      <p class="hint">
+        <span class="hint-mark" aria-hidden="true">◠</span>
+        気になるところを、ひとつ選んでください
+      </p>
+      <p class="credit">枕崎市 ／ 鹿児島県</p>
+    </footer>
+
+    <!-- 選択時の遷移演出。選んだ色で画面が満ちる -->
+    <div class="flood" id="flood" aria-hidden="true"></div>
+  </main>
+</Base>
+
+<style>
+  .sea {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 80% at 50% 0%, var(--sea-shallow) 0%, transparent 60%),
+      linear-gradient(180deg, var(--sea-mid) 0%, var(--sea-deep) 70%);
+  }
+
+  /* --- 波 ------------------------------------------------------------- */
+  .waves {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .wave {
+    position: absolute;
+    left: -50%;
+    width: 200%;
+    height: 40vh;
+    border-radius: 44%;
+    background: rgba(53, 168, 201, 0.07);
+    animation: drift linear infinite;
+  }
+  .wave-1 { top: 22%; animation-duration: 26s; }
+  .wave-2 { top: 38%; animation-duration: 38s; animation-direction: reverse; background: rgba(111, 203, 176, 0.05); }
+  .wave-3 { top: 56%; animation-duration: 52s; background: rgba(47, 98, 170, 0.08); }
+
+  @keyframes drift {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* --- ロゴ ------------------------------------------------------------ */
+  .masthead {
+    position: relative;
+    z-index: 2;
+    padding: var(--s-8) var(--s-6) 0;
+    text-align: center;
+  }
+  .logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .logo-ja {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.1rem, 8vw, 3.2rem);
+    letter-spacing: 0.06em;
+    color: var(--foam);
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+  }
+  .logo-en {
+    font-family: var(--font-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    color: var(--foam);
+    opacity: 0.55;
+  }
+  .tagline {
+    margin-top: var(--s-3);
+    font-size: var(--t-xs);
+    letter-spacing: 0.22em;
+    color: var(--foam);
+    opacity: 0.6;
+  }
+
+  /* --- 浮き ------------------------------------------------------------ */
+  .buoys {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: var(--s-4);
+    padding: var(--s-8) var(--s-6);
+  }
+
+  .buoy {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(118px, 26vw, 164px);
+    aspect-ratio: 1;
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    border-radius: var(--r-full);
+    background:
+      radial-gradient(circle at 34% 28%, rgba(255,255,255,0.5) 0%, transparent 42%),
+      var(--c);
+    box-shadow:
+      inset 0 -10px 24px rgba(0, 0, 0, 0.24),
+      0 10px 30px rgba(0, 0, 0, 0.32);
+    color: #fff;
+    text-align: center;
+    transition: filter 0.35s var(--ease);
+    will-change: transform;
+    touch-action: none;
+  }
+
+  /* 浮きの継ぎ目。漁具のブイには必ず横線が入っている */
+  .buoy::after {
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 50%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.16);
+    border-radius: 2px;
+  }
+
+  .buoy-body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--s-2);
+    pointer-events: none;
+  }
+  .buoy-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.05rem, 3.6vw, 1.3rem);
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+  }
+  /* 補足は必ず出す。色や形だけだと「推測」を強いることになる */
+  .buoy-note {
+    font-size: 0.66rem;
+    line-height: 1.5;
+    opacity: 0.92;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  }
+  .buoy-soon {
+    margin-top: 3px;
+    font-family: var(--font-data);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 1px 7px;
+    border-radius: var(--r-full);
+    background: rgba(0, 0, 0, 0.26);
+  }
+
+  .buoy:hover,
+  .buoy:focus-visible {
+    filter: brightness(1.12);
+  }
+
+  .buoy.is-soon { opacity: 0.72; }
+
+  /* --- 足元 ------------------------------------------------------------ */
+  .seabed {
+    position: relative;
+    z-index: 2;
+    padding: 0 var(--s-6) var(--s-8);
+    text-align: center;
+    color: var(--foam);
+  }
+  .hint {
+    font-size: var(--t-sm);
+    opacity: 0.78;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+  }
+  .hint-mark {
+    display: inline-block;
+    animation: bob 3.2s ease-in-out infinite;
+    opacity: 0.6;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .credit {
+    margin-top: var(--s-2);
+    font-family: var(--font-data);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    opacity: 0.35;
+  }
+
+  /* --- 遷移演出 --------------------------------------------------------- */
+  .flood {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background: var(--flood-color, var(--buoy-eat));
+    clip-path: circle(0% at var(--fx, 50%) var(--fy, 50%));
+    transition: clip-path 0.62s var(--ease);
+  }
+  .flood.is-on {
+    clip-path: circle(150% at var(--fx, 50%) var(--fy, 50%));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wave { animation: none; }
+    .hint-mark { animation: none; }
+  }
+</style>
+
+<script>
+  import Matter from "matter-js";
+
+  const nav = document.getElementById("buoys") as HTMLElement;
+  const flood = document.getElementById("flood") as HTMLElement;
+  const buoys = Array.from(nav.querySelectorAll<HTMLAnchorElement>(".buoy"));
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ------------------------------------------------------------------
+     遷移演出：選んだ浮きの色で画面が満ちてから移動する
+     ------------------------------------------------------------------ */
+  buoys.forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const href = el.getAttribute("href");
+      if (!href) return;
+      // 掴んで放り投げただけの時は遷移させない
+      if (el.dataset.dragged === "1") { e.preventDefault(); el.dataset.dragged = "0"; return; }
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      const color = getComputedStyle(el).getPropertyValue("--c").trim();
+      flood.style.setProperty("--flood-color", color || "#E8512B");
+      flood.style.setProperty("--fx", `${r.left + r.width / 2}px`);
+      flood.style.setProperty("--fy", `${r.top + r.height / 2}px`);
+      flood.classList.add("is-on");
+      window.setTimeout(() => { window.location.href = href; }, reduced ? 60 : 520);
+    });
+  });
+
+  /* ------------------------------------------------------------------
+     物理演算。動きを減らす設定なら起動せず、CSSの並びのまま使う
+     ------------------------------------------------------------------ */
+  if (!reduced && buoys.length) startPhysics();
+
+  function startPhysics() {
+    const { Engine, Runner, Bodies, Composite, Mouse, MouseConstraint, Body, Events } = Matter;
+
+    let W = nav.clientWidth;
+    let H = nav.clientHeight;
+    if (W < 80 || H < 80) return; // 描画前なら諦めてCSSの並びのまま
+
+    const engine = Engine.create();
+    // 重力は無効。海に浮かんでいる状態を作りたいので沈ませない
+    engine.gravity.x = 0;
+    engine.gravity.y = 0;
+
+    // 浮きをDOMの並びから切り離す
+    nav.style.display = "block";
+    nav.style.minHeight = `${H}px`;
+
+    const items = buoys.map((el, i) => {
+      const size = el.offsetWidth;
+      const r = size / 2;
+      const col = (i + 0.5) / buoys.length;
+      const x = Math.min(Math.max(col * W, r + 4), W - r - 4);
+      const y = H * (0.32 + (i % 3) * 0.18);
+
+      el.style.position = "absolute";
+      el.style.left = "0";
+      el.style.top = "0";
+      el.style.margin = "0";
+
+      const body = Bodies.circle(x, y, r, {
+        restitution: 0.74,   // よく跳ねる
+        frictionAir: 0.048,  // 水中の抵抗
+        friction: 0.02,
+        density: 0.0016,
+      });
+      (body as any).__el = el;
+      Composite.add(engine.world, body);
+      return { el, body, r };
+    });
+
+    // 壁。画面外に出さない
+    let walls: Matter.Body[] = [];
+    const buildWalls = () => {
+      if (walls.length) Composite.remove(engine.world, walls);
+      const t = 240;
+      walls = [
+        Bodies.rectangle(W / 2, -t / 2, W * 3, t, { isStatic: true }),
+        Bodies.rectangle(W / 2, H + t / 2, W * 3, t, { isStatic: true }),
+        Bodies.rectangle(-t / 2, H / 2, t, H * 3, { isStatic: true }),
+        Bodies.rectangle(W + t / 2, H / 2, t, H * 3, { isStatic: true }),
+      ];
+      Composite.add(engine.world, walls);
+    };
+    buildWalls();
+
+    // 指・マウスで掴んで放り投げられる
+    const mouse = Mouse.create(nav);
+    const mc = MouseConstraint.create(engine, {
+      mouse,
+      constraint: { stiffness: 0.15, render: { visible: false } },
+    });
+    Composite.add(engine.world, mc);
+    // ページのスクロールを奪わない
+    const m = mouse as any;
+    if (m.mousewheel) mouse.element.removeEventListener("wheel", m.mousewheel);
+
+    // 掴んで動かした場合はクリック扱いにしない
+    let dragStart: Matter.Vector | null = null;
+    Events.on(mc, "startdrag", (e: any) => { dragStart = { ...e.body.position }; });
+    Events.on(mc, "enddrag", (e: any) => {
+      const el = (e.body as any).__el as HTMLAnchorElement | undefined;
+      if (el && dragStart) {
+        const dx = e.body.position.x - dragStart.x;
+        const dy = e.body.position.y - dragStart.y;
+        if (Math.hypot(dx, dy) > 8) el.dataset.dragged = "1";
+      }
+      dragStart = null;
+    });
+
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // 波のうねり。ゆっくり漂わせ続ける
+    let t = 0;
+    const draw = () => {
+      t += 0.006;
+      items.forEach(({ el, body, r }, i) => {
+        Body.applyForce(body, body.position, {
+          x: Math.cos(t + i * 1.7) * 0.000045 * body.mass,
+          y: Math.sin(t * 1.3 + i * 0.9) * 0.000055 * body.mass,
+        });
+        el.style.transform =
+          `translate(${body.position.x - r}px, ${body.position.y - r}px) ` +
+          `rotate(${body.angle * 0.35}rad)`;
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    let raf = requestAnimationFrame(draw);
+
+    // 画面サイズ・向きの変更に追従する。
+    // スマホではアドレスバーの出入りで必ず起きるので、これがないと崩れる
+    let rt = 0;
+    const onResize = () => {
+      window.clearTimeout(rt);
+      rt = window.setTimeout(() => {
+        W = nav.clientWidth;
+        H = nav.clientHeight;
+        if (W < 80 || H < 80) return;
+        buildWalls();
+        items.forEach(({ body, r }) => {
+          Body.setPosition(body, {
+            x: Math.min(Math.max(body.position.x, r + 2), W - r - 2),
+            y: Math.min(Math.max(body.position.y, r + 2), H - r - 2),
+          });
+        });
+      }, 160);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("orientationchange", onResize);
+
+    // 後片付け。放置するとメモリを持っていく
+    window.addEventListener("pagehide", () => {
+      cancelAnimationFrame(raf);
+      Runner.stop(runner);
+      Composite.clear(engine.world, false);
+      Engine.clear(engine);
+      window.removeEventListener("resize", onResize);
+    });
+  }
+</script>

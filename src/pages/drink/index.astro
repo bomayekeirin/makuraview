@@ -1,0 +1,196 @@
+---
+import Base from "../../layouts/Base.astro";
+import CatHeader from "../../components/CatHeader.astro";
+import CategoryPage from "../../components/CategoryPage.astro";
+import { shopsIn } from "../../data/shops";
+
+const shops = shopsIn("drink");
+
+// 料金が判明している店。この一覧はネット上のどこにも存在しない
+const priced = shops.filter((s) => s.charge);
+
+// 同じ建物に2軒以上入っているところ＝はしご酒ができる
+const buildings = new Map<string, typeof shops>();
+for (const s of shops) {
+  if (!s.building) continue;
+  const arr = buildings.get(s.building) ?? [];
+  arr.push(s);
+  buildings.set(s.building, arr);
+}
+const hashigo = [...buildings.entries()].filter(([, v]) => v.length >= 2);
+---
+
+<Base
+  title="飲む ─ まくらびゅ｜枕崎市網羅型ポータルサイト"
+  description="枕崎市の居酒屋・バー・スナック・カラオケ。料金がわかる夜の店の一覧。"
+  category="drink"
+>
+  <!-- ★このカテゴリ固有の仕掛け（思想7）。他のページと同じ顔にしない -->
+  <section class="night">
+    <div class="wrap">
+      <p class="night-eyebrow">枕崎の夜</p>
+      <h2 class="night-h">
+        いくらかかるか、<br />先に書いておきます。
+      </h2>
+      <p class="night-lead">
+        入る前にいちばん気になるのは、たぶん値段だと思います。<br />
+        わかっている分だけ、そのまま載せました。
+      </p>
+
+      {priced.length > 0 && (
+        <ul class="price">
+          {priced.map((s) => (
+            <li class="price-row">
+              <a class="price-name" href={`/shop/${s.slug}/`}>{s.name}</a>
+              <span class="price-val">{s.charge}</span>
+              <span class="price-where">{s.address}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p class="night-note">
+        ※ 掲載時点の情報です。変わることがあるので、お店で確認してください。
+      </p>
+    </div>
+  </section>
+
+  {hashigo.length > 0 && (
+    <section class="hashigo">
+      <div class="wrap">
+        <p class="night-eyebrow">同じ建物に、2軒以上</p>
+        <h2 class="hashigo-h">歩かなくていい夜</h2>
+        <div class="hashigo-grid">
+          {hashigo.map(([name, list]) => (
+            <div class="bld">
+              <p class="bld-name">{name}</p>
+              <ul class="bld-list">
+                {list.map((s) => (
+                  <li>
+                    <a href={`/shop/${s.slug}/`}>
+                      <span class="bld-shop">{s.name}</span>
+                      <span class="bld-sub">{s.subLabel}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CategoryPage
+    category="drink"
+    intro="人口1.8万の町ですが、深夜1時を過ぎても開いている店がいくつもあります。折口町の92番地と95-1番地には、2軒ずつ入った建物が並んでいます。"
+  />
+</Base>
+
+<style>
+  /* 夜のカテゴリだけの導入部。ここで世界観を切り替える */
+  .night {
+    background:
+      radial-gradient(90% 60% at 20% 0%, rgba(196, 42, 110, 0.28) 0%, transparent 60%),
+      var(--sea-deep);
+    color: var(--foam);
+    padding: var(--s-12) 0 var(--s-16);
+  }
+  .night-eyebrow {
+    font-family: var(--font-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .night-h {
+    margin-top: var(--s-3);
+    font-size: clamp(1.9rem, 7.5vw, var(--t-xl));
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+  }
+  .night-lead {
+    margin-top: var(--s-4);
+    font-size: var(--t-sm);
+    line-height: 2;
+    opacity: 0.82;
+  }
+
+  .price {
+    margin-top: var(--s-8);
+    border-top: 1px solid rgba(237, 243, 241, 0.18);
+  }
+  .price-row {
+    display: grid;
+    grid-template-columns: minmax(9em, auto) 1fr auto;
+    gap: var(--s-2) var(--s-4);
+    align-items: baseline;
+    padding: var(--s-4) 0;
+    border-bottom: 1px solid rgba(237, 243, 241, 0.14);
+  }
+  .price-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--t-base);
+  }
+  .price-name:hover { color: var(--accent); }
+  .price-val {
+    font-family: var(--font-data);
+    font-size: var(--t-sm);
+    color: var(--accent);
+  }
+  .price-where {
+    font-size: var(--t-xs);
+    opacity: 0.5;
+    white-space: nowrap;
+  }
+  .night-note {
+    margin-top: var(--s-4);
+    font-size: var(--t-xs);
+    opacity: 0.45;
+  }
+
+  /* --- はしご酒 --------------------------------------------------------- */
+  .hashigo {
+    background: var(--sea-mid);
+    color: var(--foam);
+    padding: var(--s-12) 0;
+  }
+  .hashigo-h {
+    margin-top: var(--s-3);
+    font-size: var(--t-lg);
+  }
+  .hashigo-grid {
+    margin-top: var(--s-6);
+    display: grid;
+    gap: var(--s-4);
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  }
+  .bld {
+    padding: var(--s-5, 1.25rem);
+    border-radius: var(--r-md);
+    background: rgba(7, 30, 43, 0.5);
+    border: 1px solid rgba(237, 243, 241, 0.12);
+  }
+  .bld-name {
+    font-family: var(--font-data);
+    font-size: var(--t-xs);
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+  .bld-list { margin-top: var(--s-3); display: grid; gap: var(--s-2); }
+  .bld-list a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    padding: var(--s-2) 0;
+    border-bottom: 1px solid rgba(237, 243, 241, 0.08);
+  }
+  .bld-list a:hover .bld-shop { color: var(--accent); }
+  .bld-shop { font-weight: 700; font-size: var(--t-sm); }
+  .bld-sub { font-size: var(--t-xs); opacity: 0.5; margin-left: auto; }
+
+  @media (max-width: 560px) {
+    .price-row { grid-template-columns: 1fr; gap: 2px; }
+    .price-where { margin-top: 2px; }
+  }
+</style>

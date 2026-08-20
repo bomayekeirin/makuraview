@@ -1,0 +1,95 @@
+---
+import { CATEGORIES, byId, type CategoryId } from "../data/categories";
+
+interface Props { current: CategoryId }
+const { current } = Astro.props;
+const cat = byId(current)!;
+---
+
+<header class="cathead">
+  <div class="wrap bar">
+    <a class="home" href="/">
+      <span class="home-mark" aria-hidden="true">◠</span>
+      <span class="home-name">まくらびゅ</span>
+    </a>
+
+    <!-- 横移動。分岐したまま閉じ込めない -->
+    <nav class="jump" aria-label="ほかのカテゴリ">
+      {CATEGORIES.filter((c) => c.id !== current).map((c) => (
+        <a
+          class:list={["chip", { "is-soon": !c.ready }]}
+          href={c.ready ? `/${c.id}/` : "#"}
+          style={`--c:${c.color}`}
+        >{c.label}</a>
+      ))}
+    </nav>
+  </div>
+
+  <div class="wrap title">
+    <p class="eyebrow">{current}</p>
+    <h1>{cat.label}</h1>
+    <p class="note">{cat.note}</p>
+  </div>
+</header>
+
+<style>
+  .cathead {
+    background: var(--paper-warm);
+    border-bottom: 1px solid rgba(20, 35, 43, 0.08);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) 0;
+    flex-wrap: wrap;
+  }
+
+  .home {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--t-sm);
+    padding: var(--s-2) var(--s-3);
+    margin-left: calc(var(--s-3) * -1);
+    border-radius: var(--r-full);
+    min-height: 44px;
+  }
+  .home:hover { background: rgba(20, 35, 43, 0.06); }
+  .home-mark { color: var(--accent); font-size: 1.1em; }
+
+  .jump {
+    display: flex;
+    gap: var(--s-2);
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .chip {
+    font-size: var(--t-xs);
+    padding: 7px 13px;
+    border-radius: var(--r-full);
+    border: 1.5px solid var(--c);
+    color: var(--c);
+    background: #fff;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease);
+  }
+  .chip:hover { background: var(--c); color: #fff; }
+  .chip.is-soon { opacity: 0.4; pointer-events: none; }
+
+  .title {
+    padding: var(--s-6) 0 var(--s-8);
+  }
+  .title h1 {
+    font-size: clamp(2rem, 7vw, var(--t-2xl));
+    margin-top: var(--s-2);
+    letter-spacing: 0.02em;
+  }
+  .note {
+    margin-top: var(--s-2);
+    color: var(--ink-mid);
+    font-size: var(--t-sm);
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import Base from "../../layouts/Base.astro";
+import { SHOPS } from "../../data/shops";
+const n = SHOPS.length;
+---
+<Base title="お店を教える ─ まくらびゅ" description="枕崎市のお店の掲載は無料です。">
+  <main class="wrap">
+    <a class="home" href="/">← まくらびゅ</a>
+
+    <h1>お店を教えてください</h1>
+    <p class="lead">
+      いま <strong>{n}</strong> 軒を載せる準備をしています。<br />
+      でも枕崎のお店は、まだこんなものではないはずです。
+    </p>
+
+    <section class="box">
+      <h2>掲載は無料です</h2>
+      <ul class="pts">
+        <li>お金はいただきません</li>
+        <li>いつでも消せます。ひとことで結構です</li>
+        <li><strong>住所を伏せて載せる</strong>こともできます</li>
+        <li>載せてほしくない場合も、そう伝えてください</li>
+      </ul>
+    </section>
+
+    <section class="box">
+      <h2>教えてほしいこと</h2>
+      <ul class="pts">
+        <li>お店の名前と場所</li>
+        <li>営業時間と、休みの日</li>
+        <li>電話番号、InstagramやX</li>
+        <li>予約の方法（電話だけ、DMも可、など）</li>
+        <li>お金の目安があれば</li>
+      </ul>
+      <p class="sm">全部そろっていなくて大丈夫です。名前だけでも。</p>
+    </section>
+
+    <div class="cta">
+      <p class="soon">フォームは準備中です</p>
+      <p class="sm">
+        いまはInstagram <strong>@makuraview</strong> のDMで受け付けています。
+      </p>
+    </div>
+  </main>
+</Base>
+
+<style>
+  main { padding: var(--s-8) 0 var(--s-16); max-width: 44rem; }
+  .home { font-size: var(--t-sm); color: var(--ink-mid); }
+  h1 { margin-top: var(--s-6); font-size: clamp(1.8rem, 7vw, var(--t-xl)); }
+  .lead { margin-top: var(--s-4); line-height: 2; color: var(--ink-mid); }
+  .lead strong { font-family: var(--font-data); font-size: 1.3em; color: var(--sea-shallow); }
+  .box {
+    margin-top: var(--s-8);
+    padding: var(--s-6);
+    border-radius: var(--r-md);
+    background: var(--paper-warm);
+  }
+  .box h2 { font-size: var(--t-md); }
+  .pts { margin-top: var(--s-4); display: grid; gap: var(--s-2); }
+  .pts li {
+    position: relative; padding-left: 1.3em;
+    font-size: var(--t-sm); line-height: 1.9;
+  }
+  .pts li::before {
+    content: ""; position: absolute; left: 0; top: 0.72em;
+    width: 7px; height: 7px; border-radius: var(--r-full);
+    background: var(--sea-shallow);
+  }
+  .sm { margin-top: var(--s-3); font-size: var(--t-xs); color: var(--ink-mid); line-height: 1.8; }
+  .cta {
+    margin-top: var(--s-8); padding: var(--s-6);
+    border: 2px dashed rgba(20,35,43,0.2); border-radius: var(--r-md);
+    text-align: center;
+  }
+  .soon { font-family: var(--font-display); font-weight: 700; }
+</style>

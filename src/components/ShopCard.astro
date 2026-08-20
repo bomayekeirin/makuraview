@@ -1,4 +1,5 @@
 ---
+import { url } from "../lib/url";
 import { WEEKDAY_JA, isOpenToday, type Shop } from "../data/shops";
 
 interface Props { shop: Shop }
@@ -10,7 +11,7 @@ const closedText = shop.closed.length
 ---
 
 <article class="card">
-  <a class="hit" href={`/shop/${shop.slug}/`} data-track="page_view" data-shop={shop.slug}>
+  <a class="hit" href={url(`/shop/${shop.slug}/`)} data-track="page_view" data-shop={shop.slug}>
     <div class="head">
       <span class="tag">{shop.subLabel}</span>
       <span class:list={["state", open ? "is-open" : "is-closed"]}>
@@ -20,6 +21,10 @@ const closedText = shop.closed.length
 
     <h3 class="name">{shop.name}</h3>
     {shop.lead && <p class="lead">{shop.lead}</p>}
+
+    {shop.charge && (
+      <p class="charge">{shop.charge}</p>
+    )}
 
     {shop.signature && (
       <p class="sig">
@@ -31,11 +36,10 @@ const closedText = shop.closed.length
     <dl class="meta">
       <div><dt>場所</dt><dd>{shop.address}</dd></div>
       {shop.hours && <div><dt>時間</dt><dd class="num">{shop.hours}</dd></div>}
-      <div><dt>休み</dt><dd>{closedText}</dd></div>
+      <div><dt>休み</dt><dd>{closedText}{shop.irregular && <span class="irr">＋不定休</span>}</dd></div>
     </dl>
   </a>
 
-  <!-- 計測用。data属性で宣言的に持たせ、拾うのは1箇所（D-15） -->
   {shop.tel && (
     <a class="tel" href={`tel:${shop.tel.replace(/-/g, "")}`}
        data-track="tap_tel" data-shop={shop.slug}>
@@ -82,6 +86,7 @@ const closedText = shop.closed.length
   }
   .state {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: 0.66rem;
     letter-spacing: 0.06em;
     margin-left: auto;
@@ -101,7 +106,18 @@ const closedText = shop.closed.length
     line-height: 1.8;
   }
 
-  /* 名物と価格。数字が入ると急に「使えるサイト」になる */
+  .charge {
+    margin-top: var(--s-3);
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    font-family: var(--font-data);
+    font-weight: 500;
+    font-size: var(--t-xs);
+    color: color-mix(in srgb, var(--accent) 80%, #000);
+    line-height: 1.7;
+  }
+
   .sig {
     margin-top: var(--s-3);
     display: inline-flex;
@@ -115,9 +131,9 @@ const closedText = shop.closed.length
   .sig-item { font-weight: 700; font-size: var(--t-sm); }
   .sig-price {
     font-family: var(--font-data);
+    font-weight: 500;
     font-size: var(--t-sm);
     color: var(--accent);
-    font-weight: var(--w-body);
   }
 
   .meta {
@@ -135,6 +151,7 @@ const closedText = shop.closed.length
   }
   .meta dd { margin: 0; }
   .num { font-family: var(--font-data); font-weight: 500; font-size: 0.92em; }
+  .irr { color: #C98A16; margin-left: 0.4em; }
 
   .tel {
     display: flex;

@@ -176,3 +176,173 @@ const irregularCount = shops.filter((s) => s.irregular).length;
   }
   .chip:hover { border-color: var(--accent); color: var(--accent); }
   .chip.is-on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .chip-n { font-family: var(--font-data); font-weight: 500; font-size: 0.78em; opacity: 0.72; }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-height: 44px;
+    cursor: pointer;
+    font-size: var(--t-sm);
+    margin-left: auto;
+    user-select: none;
+  }
+  .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .toggle-box {
+    width: 44px; height: 26px;
+    border-radius: var(--r-full);
+    background: rgba(20, 35, 43, 0.16);
+    position: relative;
+    transition: background 0.25s var(--ease);
+    flex: none;
+  }
+  .toggle-box::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: var(--r-full);
+    background: #fff;
+    transition: transform 0.25s var(--ease);
+  }
+  .toggle input:checked + .toggle-box { background: var(--accent); }
+  .toggle input:checked + .toggle-box::after { transform: translateX(18px); }
+  .toggle input:focus-visible + .toggle-box {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .count {
+    margin-top: var(--s-4);
+    font-family: var(--font-data);
+    font-weight: 500;
+    font-size: var(--t-xs);
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+  }
+
+  .list {
+    margin-top: var(--s-3);
+    display: grid;
+    gap: var(--s-4);
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  }
+  .cell { display: contents; }
+  .cell[hidden] { display: none; }
+
+  .empty {
+    margin-top: var(--s-12);
+    text-align: center;
+    color: var(--ink-mid);
+    font-size: var(--t-sm);
+  }
+  .reset {
+    margin-left: var(--s-2);
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .ask {
+    margin-top: var(--s-16);
+    padding: var(--s-8);
+    border-radius: var(--r-md);
+    border: 2px dashed color-mix(in srgb, var(--accent) 34%, transparent);
+    text-align: center;
+  }
+  .ask h2 { font-size: var(--t-md); }
+  .ask p {
+    margin-top: var(--s-3);
+    color: var(--ink-mid);
+    font-size: var(--t-sm);
+    line-height: 1.9;
+  }
+  .ask-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    margin-top: var(--s-4);
+    padding: 0 var(--s-8);
+    border-radius: var(--r-full);
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+  .ask-btn:hover { filter: brightness(1.1); }
+
+  .foot {
+    background: var(--sea-deep);
+    color: var(--foam);
+    padding: var(--s-12) 0;
+  }
+  .foot-in { text-align: center; }
+  .foot-logo { font-family: var(--font-display); font-weight: 900; font-size: var(--t-md); }
+  .foot-sub {
+    margin-top: var(--s-1);
+    font-size: var(--t-xs);
+    opacity: 0.5;
+    letter-spacing: 0.18em;
+  }
+  .foot-home {
+    display: inline-block;
+    margin-top: var(--s-6);
+    padding: var(--s-3) var(--s-6);
+    border: 1px solid rgba(237, 243, 241, 0.3);
+    border-radius: var(--r-full);
+    font-size: var(--t-sm);
+    transition: background 0.2s var(--ease);
+  }
+  .foot-home:hover { background: rgba(237, 243, 241, 0.1); }
+
+  @media (max-width: 560px) {
+    .toggle { margin-left: 0; }
+  }
+</style>
+
+<script>
+  const cells = Array.from(document.querySelectorAll<HTMLElement>(".cell"));
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>(".chip"));
+  const openOnly = document.getElementById("open-only") as HTMLInputElement;
+  const countEl = document.getElementById("count")!;
+  const emptyEl = document.getElementById("empty")!;
+  const resetBtn = document.getElementById("reset");
+
+  let sub = "all";
+
+  function apply() {
+    let n = 0;
+    for (const c of cells) {
+      const okSub = sub === "all" || c.dataset.sub === sub;
+      const okOpen = !openOnly.checked || c.dataset.open === "1";
+      const show = okSub && okOpen;
+      c.hidden = !show;
+      if (show) n++;
+    }
+    countEl.textContent = `${n} 軒を表示中`;
+    emptyEl.hidden = n > 0;
+  }
+
+  chips.forEach((c) => {
+    c.addEventListener("click", () => {
+      chips.forEach((x) => x.classList.toggle("is-on", x === c));
+      sub = c.dataset.sub!;
+      apply();
+    });
+  });
+
+  openOnly.addEventListener("change", apply);
+
+  resetBtn?.addEventListener("click", () => {
+    sub = "all";
+    openOnly.checked = false;
+    chips.forEach((x) => x.classList.toggle("is-on", x.dataset.sub === "all"));
+    apply();
+  });
+
+  apply();
+</script>
